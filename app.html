@@ -51,55 +51,33 @@
         }
 
         .target {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-            background: conic-gradient(
-                from 0deg,
-                #ff4444,
-                #ff8f1c,
-                #fff01f,
-                #48ff3c,
-                #2cffea,
-                #4d6bff,
-                #ff4444
-            );
-            transform-origin: center;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-        }
+        position: absolute;
+        border-radius: 50%;
+        cursor: crosshair;
+        background: radial-gradient(circle at center,
+            #ff4444 0%,    /* Red center */
+            #ff4444 30%,   
+            white 30%,     /* White middle ring */
+            white 60%,
+            #ff4444 60%,   /* Red outer ring */
+            #ff4444 100%
+        );
+        transform-origin: center;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+    }
 
-        .target::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 85%;
-            height: 85%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at center,
-                rgba(255, 255, 255, 0.9) 0%,
-                rgba(255, 255, 255, 0.8) 20%,
-                rgba(255, 255, 255, 0) 70%
-            );
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
+    /* Remove all previous target ::before and ::after */
+    .target::before,
+    .target::after {
+        display: none;
+    }
 
-        .target::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50%;
-            height: 50%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at center,
-                #ff4444 0%,
-                rgba(255, 68, 68, 0.8) 50%,
-                rgba(255, 68, 68, 0) 100%
-            );
-            border-radius: 50%;
-        }
+    /* Simple hit effect */
+    .hit-effect {
+    }
+
+    @keyframes simpleHit {
+    }
 
         #controls {
             position: fixed;
@@ -362,56 +340,51 @@
         }
 
         function createTarget() {
-            const size = parseInt(targetSizeInput.value);
-            const lifetime = parseFloat(targetLifetimeInput.value) * 1000;
-            const target = document.createElement('div');
-            target.className = 'target';
-            target.style.width = size + 'px';
-            target.style.height = size + 'px';
-            
-            target.style.animation = `targetLifecycle ${lifetime}ms ease-in-out`;
-            
-            const maxX = gameArea.clientWidth - size;
-            const maxY = gameArea.clientHeight - size;
-            target.style.left = Math.random() * maxX + 'px';
-            target.style.top = Math.random() * maxY + 'px';
-            
-            target.addEventListener('mousedown', hitTarget);
-            target.addEventListener('contextmenu', (e) => e.preventDefault());
-            gameArea.appendChild(target);
+        const size = parseInt(targetSizeInput.value);
+        const lifetime = parseFloat(targetLifetimeInput.value) * 1000;
+        const target = document.createElement('div');
+        target.className = 'target';
+        target.style.width = size + 'px';
+        target.style.height = size + 'px';
+        
+        target.style.animation = `targetLifecycle ${lifetime}ms ease-out`;
+        
+        const maxX = gameArea.clientWidth - size;
+        const maxY = gameArea.clientHeight - size;
+        target.style.left = Math.random() * maxX + 'px';
+        target.style.top = Math.random() * maxY + 'px';
+        
+        target.addEventListener('mousedown', hitTarget);
+        target.addEventListener('contextmenu', (e) => e.preventDefault());
+        gameArea.appendChild(target);
 
-            setTimeout(() => {
-                if (target.parentNode === gameArea) {
-                    target.remove();
-                    misses++;
-                    updateStats();
-                    // Removed: playSound(220, 0.1, 'sawtooth'); // Miss sound
-                }
-            }, lifetime);
-        }
+        setTimeout(() => {
+            if (target.parentNode === gameArea) {
+                target.remove();
+                misses++;
+                updateStats();
+            }
+        }, lifetime);
+    }
 
-        function createHitEffect(x, y) {
-            const effect = document.createElement('div');
-            effect.className = 'hit-effect';
-            effect.style.left = x + 'px';
-            effect.style.top = y + 'px';
-            effect.style.width = '20px';
-            effect.style.height = '20px';
-            effect.style.backgroundColor = '#fff';
-            effect.style.borderRadius = '50%';
-            gameArea.appendChild(effect);
-            
-            setTimeout(() => effect.remove(), 300);
-        }
+    function createHitEffect(x, y) {
+        const effect = document.createElement('div');
+        effect.className = 'hit-effect';
+        effect.style.left = (x - 10) + 'px';
+        effect.style.top = (y - 10) + 'px';
+        gameArea.appendChild(effect);
+        
+        setTimeout(() => effect.remove(), 200);
+    }
 
-        function hitTarget(e) {
-            e.preventDefault();
-            e.target.remove();
-            hits++;
-            updateStats();
-            playSound(880, 0.1, 'sine');
-            createHitEffect(e.pageX, e.pageY);
-        }
+    function hitTarget(e) {
+        e.preventDefault();
+        e.target.remove();
+        hits++;
+        updateStats();
+        playSound(880, 0.1, 'sine');
+        // Removed: createHitEffect(e.pageX, e.pageY);
+    }
 
         function updateStats() {
             hitsElement.textContent = hits;
