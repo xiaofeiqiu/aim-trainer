@@ -1,28 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Aim Trainer</title>
+    <title>Aim Trainer Pro</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            background-color: #1a1a1a;
+            background-color: #0a0a0a;
             color: white;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
         #gameArea {
-            width: 800px;
-            height: 600px;
-            background-color: #2d2d2d;
+            flex: 1;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
             position: relative;
             cursor: crosshair;
-            margin: 20px;
             overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         .target {
@@ -40,6 +59,7 @@
                 #ff4444
             );
             transform-origin: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
 
         .target::before {
@@ -75,17 +95,100 @@
             border-radius: 50%;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+        #controls {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            z-index: 1000;
         }
 
-        @keyframes targetLifecycle {
-            0% { transform: scale(0); }
-            45% { transform: scale(1); }
-            90% { transform: scale(0); }
-            100% { transform: scale(0); }
+        .control-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        label {
+            min-width: 160px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 4px;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+        }
+
+        #settingsButton {
+            background-color: transparent;
+            border: 1px solid #4CAF50;
+            padding: 8px 16px;
+        }
+
+        #timer {
+            font-family: monospace;
+            font-size: 24px;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
         }
 
         .hit-effect {
@@ -105,130 +208,58 @@
             }
         }
 
-        #controls {
-            margin: 20px;
-            padding: 20px;
-            background-color: #333;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
 
-        .control-group {
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        label {
-            min-width: 140px;
-        }
-
-        input[type="range"] {
-            width: 200px;
-            height: 8px;
-            background: #4CAF50;
-            border-radius: 4px;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        }
-
-        #stats {
-            font-size: 18px;
-            margin: 10px;
-            display: grid;
-            grid-template-columns: auto auto;
-            gap: 20px;
-            background-color: #333;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        }
-
-        .stat-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        button:hover {
-            background-color: #45a049;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 7px rgba(0,0,0,0.3);
-        }
-
-        button:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        #timer {
-            font-family: monospace;
-            font-size: 24px;
-            color: #4CAF50;
-            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: #4CAF50;
+        @keyframes targetLifecycle {
+            0% { transform: scale(0); }
+            45% { transform: scale(1); }
+            90% { transform: scale(0); }
+            100% { transform: scale(0); }
         }
     </style>
 </head>
 <body>
+    <div id="header">
+        <div id="stats">
+            <div class="stat-group">
+                <span>Hits: <span id="hits" class="stat-value">0</span></span>
+                <span>Misses: <span id="misses" class="stat-value">0</span></span>
+                <span>Accuracy: <span id="accuracy" class="stat-value">0</span>%</span>
+            </div>
+            <div class="stat-group">
+                <span>Time: <span id="timer">00:00:00</span></span>
+            </div>
+        </div>
+        <div class="button-group">
+            <button id="startGame">Start Game</button>
+            <button id="resetGame">Reset</button>
+            <button id="settingsButton">⚙️ Settings</button>
+        </div>
+    </div>
+
     <div id="controls">
         <div class="control-group">
             <label for="targetsPerSec">Targets per second:</label>
-            <input type="range" id="targetsPerSec" min="0.2" max="5" step="0.1" value="3.5">
-            <span id="targetsPerSecValue">4.0</span>
+            <input type="range" id="targetsPerSec" min="0.2" max="5" step="0.1" value="2.0">
+            <span id="targetsPerSecValue">2.0</span>
         </div>
         <div class="control-group">
             <label for="targetSize">Target Size (px):</label>
-            <input type="range" id="targetSize" min="20" max="100" value="100">
-            <span id="targetSizeValue">60</span>
+            <input type="range" id="targetSize" min="20" max="100" value="40">
+            <span id="targetSizeValue">40</span>
         </div>
         <div class="control-group">
             <label for="targetLifetime">Target Lifetime (sec):</label>
-            <input type="range" id="targetLifetime" min="0.5" max="10" value="5" step="0.1">
+            <input type="range" id="targetLifetime" min="0.5" max="10" value="2.0" step="0.1">
             <span id="targetLifetimeValue">2.0</span>
         </div>
-        <button id="startGame">Start Game</button>
-        <button id="resetGame">Reset Game</button>
     </div>
-    <div id="stats">
-        <div class="stat-group">
-            <span>Hits: <span id="hits" class="stat-value">0</span></span>
-            <span>Misses: <span id="misses" class="stat-value">0</span></span>
-            <span>Accuracy: <span id="accuracy" class="stat-value">0</span>%</span>
-        </div>
-        <div class="stat-group">
-            <span>Time: <span id="timer">00:00:00</span></span>
-        </div>
-    </div>
-    <div id="gameArea"></div>
 
+    <div id="gameArea"></div>
     <script>
         const gameArea = document.getElementById('gameArea');
         const targetsPerSecInput = document.getElementById('targetsPerSec');
@@ -239,6 +270,8 @@
         const targetLifetimeValue = document.getElementById('targetLifetimeValue');
         const startButton = document.getElementById('startGame');
         const resetButton = document.getElementById('resetGame');
+        const settingsButton = document.getElementById('settingsButton');
+        const controlsPanel = document.getElementById('controls');
         const hitsElement = document.getElementById('hits');
         const missesElement = document.getElementById('misses');
         const accuracyElement = document.getElementById('accuracy');
@@ -257,6 +290,18 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
             document.removeEventListener('click', initAudio);
+        });
+
+        settingsButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            controlsPanel.style.display = controlsPanel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Close settings when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!controlsPanel.contains(e.target) && e.target !== settingsButton) {
+                controlsPanel.style.display = 'none';
+            }
         });
 
         function playSound(frequency, duration, type = 'sine') {
@@ -311,13 +356,12 @@
 
         function createTarget() {
             const size = parseInt(targetSizeInput.value);
-            const lifetime = parseFloat(targetLifetimeInput.value) * 1000; // Convert to milliseconds
+            const lifetime = parseFloat(targetLifetimeInput.value) * 1000;
             const target = document.createElement('div');
             target.className = 'target';
             target.style.width = size + 'px';
             target.style.height = size + 'px';
             
-            // Set animation for the target lifecycle
             target.style.animation = `targetLifecycle ${lifetime}ms ease-in-out`;
             
             const maxX = gameArea.clientWidth - size;
@@ -329,12 +373,12 @@
             target.addEventListener('contextmenu', (e) => e.preventDefault());
             gameArea.appendChild(target);
 
-            // Remove target and count as miss if not hit within lifetime
             setTimeout(() => {
                 if (target.parentNode === gameArea) {
                     target.remove();
                     misses++;
                     updateStats();
+                    playSound(220, 0.1, 'sawtooth'); // Miss sound
                 }
             }, lifetime);
         }
@@ -359,7 +403,7 @@
             hits++;
             updateStats();
             playSound(880, 0.1, 'sine');
-            createHitEffect(e.pageX - gameArea.offsetLeft, e.pageY - gameArea.offsetTop);
+            createHitEffect(e.pageX, e.pageY);
         }
 
         function updateStats() {
@@ -377,12 +421,13 @@
                 const spawnRate = Math.round(1000 / parseFloat(targetsPerSecInput.value));
                 spawnInterval = setInterval(createTarget, spawnRate);
                 timerInterval = setInterval(updateTimer, 1000);
-                startButton.textContent = 'Pause Game';
+                startButton.textContent = 'Pause';
+                controlsPanel.style.display = 'none';
             } else {
                 gameRunning = false;
                 clearInterval(spawnInterval);
                 clearInterval(timerInterval);
-                startButton.textContent = 'Resume Game';
+                startButton.textContent = 'Resume';
             }
         }
 
@@ -399,11 +444,13 @@
             startButton.textContent = 'Start Game';
         }
 
+        // Event listeners for game controls
         gameArea.addEventListener('mousedown', (e) => {
             if (e.target === gameArea) {
                 e.preventDefault();
                 misses++;
                 updateStats();
+                playSound(220, 0.1, 'sawtooth'); // Miss sound
             }
         });
 
@@ -417,6 +464,7 @@
         startButton.addEventListener('click', startGame);
         resetButton.addEventListener('click', resetGame);
 
+        // Initialize displays
         updateTargetsPerSecDisplay();
         updateTargetSizeDisplay();
         updateTargetLifetimeDisplay();
