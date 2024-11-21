@@ -39,6 +39,7 @@
                 #4d6bff,
                 #ff4444
             );
+            transform-origin: center;
         }
 
         .target::before {
@@ -74,19 +75,34 @@
             border-radius: 50%;
         }
 
-        @keyframes spawn {
-            from {
-                transform: scale(0) rotate(180deg);
-            }
-            to {
-                transform: scale(1) rotate(0deg);
-            }
-        }
-
         @keyframes pulse {
             0% { opacity: 0.5; }
             50% { opacity: 1; }
             100% { opacity: 0.5; }
+        }
+
+        @keyframes targetLifecycle {
+            0% { transform: scale(0); }
+            45% { transform: scale(1); }
+            90% { transform: scale(0); }
+            100% { transform: scale(0); }
+        }
+
+        .hit-effect {
+            position: absolute;
+            pointer-events: none;
+            animation: hitEffect 0.3s ease-out forwards;
+        }
+
+        @keyframes hitEffect {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
         }
 
         #controls {
@@ -168,23 +184,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
-        .hit-effect {
-            position: absolute;
-            pointer-events: none;
-            animation: hitEffect 0.3s ease-out forwards;
-        }
-
-        @keyframes hitEffect {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-
         #timer {
             font-family: monospace;
             font-size: 24px;
@@ -202,18 +201,18 @@
     <div id="controls">
         <div class="control-group">
             <label for="targetsPerSec">Targets per second:</label>
-            <input type="range" id="targetsPerSec" min="0.2" max="5" step="0.1" value="4">
+            <input type="range" id="targetsPerSec" min="0.2" max="5" step="0.1" value="3.5">
             <span id="targetsPerSecValue">4.0</span>
         </div>
         <div class="control-group">
             <label for="targetSize">Target Size (px):</label>
             <input type="range" id="targetSize" min="20" max="100" value="100">
-            <span id="targetSizeValue">100</span>
+            <span id="targetSizeValue">60</span>
         </div>
         <div class="control-group">
-            <label for="animationSpeed">Animation Speed (sec):</label>
-            <input type="range" id="animationSpeed" min="0.1" max="2.0" value="1.5" step="0.1">
-            <span id="animationSpeedValue">0.3</span>
+            <label for="targetLifetime">Target Lifetime (sec):</label>
+            <input type="range" id="targetLifetime" min="0.5" max="10" value="5" step="0.1">
+            <span id="targetLifetimeValue">2.0</span>
         </div>
         <button id="startGame">Start Game</button>
         <button id="resetGame">Reset Game</button>
@@ -234,10 +233,10 @@
         const gameArea = document.getElementById('gameArea');
         const targetsPerSecInput = document.getElementById('targetsPerSec');
         const targetSizeInput = document.getElementById('targetSize');
-        const animationSpeedInput = document.getElementById('animationSpeed');
+        const targetLifetimeInput = document.getElementById('targetLifetime');
         const targetsPerSecValue = document.getElementById('targetsPerSecValue');
         const targetSizeValue = document.getElementById('targetSizeValue');
-        const animationSpeedValue = document.getElementById('animationSpeedValue');
+        const targetLifetimeValue = document.getElementById('targetLifetimeValue');
         const startButton = document.getElementById('startGame');
         const resetButton = document.getElementById('resetGame');
         const hitsElement = document.getElementById('hits');
@@ -279,11 +278,6 @@
             oscillator.stop(audioContext.currentTime + duration);
         }
 
-        function updateAnimationSpeed() {
-            const speed = parseFloat(animationSpeedInput.value).toFixed(1);
-            animationSpeedValue.textContent = speed;
-        }
-
         function updateTargetsPerSecDisplay() {
             targetsPerSecValue.textContent = parseFloat(targetsPerSecInput.value).toFixed(1);
             if (gameRunning) {
@@ -295,6 +289,10 @@
 
         function updateTargetSizeDisplay() {
             targetSizeValue.textContent = targetSizeInput.value;
+        }
+
+        function updateTargetLifetimeDisplay() {
+            targetLifetimeValue.textContent = parseFloat(targetLifetimeInput.value).toFixed(1);
         }
 
         function formatTime(ms) {
@@ -313,11 +311,14 @@
 
         function createTarget() {
             const size = parseInt(targetSizeInput.value);
+            const lifetime = parseFloat(targetLifetimeInput.value) * 1000; // Convert to milliseconds
             const target = document.createElement('div');
             target.className = 'target';
             target.style.width = size + 'px';
             target.style.height = size + 'px';
-            target.style.animation = `spawn ${animationSpeedInput.value * 1000}ms ease-out`;
+            
+            // Set animation for the target lifecycle
+            target.style.animation = `targetLifecycle ${lifetime}ms ease-in-out`;
             
             const maxX = gameArea.clientWidth - size;
             const maxY = gameArea.clientHeight - size;
@@ -328,13 +329,14 @@
             target.addEventListener('contextmenu', (e) => e.preventDefault());
             gameArea.appendChild(target);
 
+            // Remove target and count as miss if not hit within lifetime
             setTimeout(() => {
                 if (target.parentNode === gameArea) {
                     target.remove();
                     misses++;
                     updateStats();
                 }
-            }, 2000);
+            }, lifetime);
         }
 
         function createHitEffect(x, y) {
@@ -411,13 +413,13 @@
 
         targetsPerSecInput.addEventListener('input', updateTargetsPerSecDisplay);
         targetSizeInput.addEventListener('input', updateTargetSizeDisplay);
-        animationSpeedInput.addEventListener('input', updateAnimationSpeed);
+        targetLifetimeInput.addEventListener('input', updateTargetLifetimeDisplay);
         startButton.addEventListener('click', startGame);
         resetButton.addEventListener('click', resetGame);
 
         updateTargetsPerSecDisplay();
         updateTargetSizeDisplay();
-        updateAnimationSpeed();
+        updateTargetLifetimeDisplay();
     </script>
 </body>
 </html>
