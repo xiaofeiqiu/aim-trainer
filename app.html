@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Aim Trainer Pro</title>
-    <style>
+        <style>
         * {
             margin: 0;
             padding: 0;
@@ -13,6 +13,7 @@
             margin: 0;
             display: flex;
             flex-direction: column;
+            align-items: center; /* Added to help with centering */
             background-color: #0a0a0a;
             color: white;
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -28,20 +29,25 @@
             align-items: center;
             position: fixed;
             top: 0;
-            left: 0;
-            right: 0;
+            left: 10%;
+            right: 10%;
             z-index: 100;
             backdrop-filter: blur(10px);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
         }
 
         #gameArea {
             flex: 1;
-            width: 100vw;
+            width: 80vw;
             height: 100vh;
             background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
             position: relative;
             cursor: crosshair;
             overflow: hidden;
+            margin: 0 auto;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .target {
@@ -107,6 +113,7 @@
             backdrop-filter: blur(10px);
             display: none;
             z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .control-group {
